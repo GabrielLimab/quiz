@@ -105,7 +105,28 @@ def test_choice_by_id_returns_choice():
 def test_invalid_choice_id_raises():
     q = Question("q")
     q.add_choice("A")
-    invalid_id = 999  # assuming the id will never go this high
+    invalid_id = 999
     assert invalid_id not in [c.id for c in q.choices]
     with pytest.raises(Exception, match="Invalid choice id"):
         q._choice_by_id(invalid_id)
+
+@pytest.fixture
+def question_with_four_choices():
+    q = Question("Question with four choices")
+    q.add_choice("Option A")
+    q.add_choice("Option B", is_correct=True)
+    q.add_choice("Option C")
+    q.add_choice("Option D", is_correct=True)
+    return q
+
+def test_correct_choice_ids(question_with_four_choices):
+    q = question_with_four_choices
+    correct_ids = q._correct_choice_ids()
+    assert len(correct_ids) == 2
+    for cid in correct_ids:
+        assert q._choice_by_id(cid).is_correct
+
+def test_sequential_choice_ids(question_with_four_choices):
+    q = question_with_four_choices
+    choice_ids = [choice.id for choice in q.choices]
+    assert choice_ids == [1, 2, 3, 4]
